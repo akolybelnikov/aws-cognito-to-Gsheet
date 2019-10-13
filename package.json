@@ -1,0 +1,26 @@
+{
+  "name": "cognito_to_gsheet",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": {
+    "email": "a.kolybelnikov@gmail.com",
+    "name": "Andrey Kolybelnikov"
+  },
+  "repository": {
+    "url": ""
+  },
+  "license": "MIT",
+  "dependencies": {
+    "csv-writer": "^1.5.0",
+    "googleapis": "39",
+    "moment": "^2.24.0",
+    "netlify-lambda": "^1.6.3"
+  },
+  "scripts": {
+    "build": "netlify-lambda build lambda",
+    "serve": "netlify-lambda serve lambda"
+  },
+  "devDependencies": {
+    "dotenv": "^8.1.0"
+  }
+}

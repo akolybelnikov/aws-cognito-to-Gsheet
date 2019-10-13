@@ -1,0 +1,15 @@
+# node modules
+node_modules
+
+# env variables
+.env
+
+# google credentials
+credentials.json
+token.json
+
+# generated files
+assets
+
+# built lambda functions
+built-lambda
