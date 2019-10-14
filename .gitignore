@@ -12,4 +12,4 @@ token.json
 assets
 
 # built lambda functions
-netlify
+functions
