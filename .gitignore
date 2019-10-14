@@ -9,7 +9,7 @@ credentials.json
 token.json
 
 # generated files
-assets
+data/*
 
 # built lambda functions
 functions
