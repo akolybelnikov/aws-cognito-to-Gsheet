@@ -3,21 +3,26 @@ require('dotenv').config()
 const fs = require('fs')
 const readline = require('readline')
 const { google } = require('googleapis')
-// const { importJSON } = require('./transformUsers')
 
 const TOKEN_PATH = 'token.json'
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-const USERS_JSON = 'assets/sanitizedUsers.json'
+// const USERS_JSON = 'data/users.json'
 
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID
+const CREDENTIALS = {
+  installed: {
+    client_id: process.env.CLIENT_ID,
+    project_id: process.env.PROJECT_ID,
+    auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+    token_uri: 'https://oauth2.googleapis.com/token',
+    auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+    client_secret: process.env.CLIENT_SECRET,
+    redirect_uris: ['urn:ietf:wg:oauth:2.0:oob', 'http://localhost'],
+  },
+}
 
-function processUsers() {
-  // Load client secrets from a local file.
-  fs.readFile('credentials.json', (err, content) => {
-    if (err) return console.log('Error loading client secret file:', err)
-    // Authorize a client with credentials, then call the Google Sheets API.
-    authorize(JSON.parse(content), addNewUsers)
-  })
+function processUsers(cognitoUsers) {
+  return authorize(CREDENTIALS, addNewUsers, cognitoUsers)
 }
 
 /**
@@ -26,7 +31,7 @@ function processUsers() {
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
-function authorize(credentials, callback) {
+function authorize(credentials, callback, cognitoUsers) {
   const { client_secret, client_id, redirect_uris } = credentials.installed
   const oAuth2Client = new google.auth.OAuth2(
     client_id,
@@ -38,7 +43,7 @@ function authorize(credentials, callback) {
   fs.readFile(TOKEN_PATH, (err, token) => {
     if (err) return getNewToken(oAuth2Client, callback)
     oAuth2Client.setCredentials(JSON.parse(token))
-    callback(oAuth2Client)
+    return callback(oAuth2Client, cognitoUsers)
   })
 }
 
@@ -78,50 +83,51 @@ function getNewToken(oAuth2Client, callback) {
  * Prints the users data in the spreadsheet:
  * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
  */
-function addNewUsers(auth) {
+async function addNewUsers(auth, users) {
   const sheets = google.sheets({ version: 'v4', auth })
   sheets.spreadsheets.values.get(
     {
       spreadsheetId: SPREADSHEET_ID,
       range: 'Users!F2:F',
     },
-    (err, res) => {
+    async (err, res) => {
       if (err) return console.error('The API returned an error: ' + err)
       const emails = res.data.values
-      if (emails.length) {
-        fs.readFile(USERS_JSON, { encoding: 'utf8' }, (err, data) => {
-          if (err) throw err
-          let Data = JSON.parse(data)
-          if (emails.length < Data.length) {
-            let gsheetUserEmails = []
-            emails.map(email => gsheetUserEmails.push(email[0].toLowerCase()))
-            const diff = Data.filter(
-              user => !gsheetUserEmails.includes(user.email.toLowerCase()),
-            ).map(userdata => Object.values(userdata))
-            addUsers(auth, diff)
-          }
-        })
-      } else {
-        console.log('No data found.')
+      // fs.readFile(USERS_JSON, { encoding: 'utf8' }, (err, data) => {
+      //   if (err) throw err
+      // let Data = JSON.parse(data)
+      if (emails.length && emails.length < users.length) {
+        let gsheetUserEmails = []
+        emails.map(email => gsheetUserEmails.push(email[0].toLowerCase()))
+        const diff = users
+          .filter(user => !gsheetUserEmails.includes(user.email.toLowerCase()))
+          .map(userdata => Object.values(userdata))
+        const res = await addUsers(auth, diff)
+        return { diff, res }
       }
+      return String(null)
+      // })
     },
   )
 }
 
-function addUsers(auth, newUsers) {
-  const sheets = google.sheets({ version: 'v4', auth })
-  sheets.spreadsheets.values
-    .append({
-      spreadsheetId: SPREADSHEET_ID,
-      range: 'Users!A2:F',
-      valueInputOption: 'RAW',
-      insertDataOption: 'INSERT_ROWS',
-      requestBody: {
-        values: newUsers,
-      },
-    })
-    .then(res => console.info(res.status, res.statusText))
-    .catch(err => console.error(err))
+async function addUsers(auth, newUsers) {
+  try {
+    return await google
+      .sheets({ version: 'v4', auth })
+      .spreadsheets.values.append({
+        spreadsheetId: SPREADSHEET_ID,
+        range: 'Users!A2:F',
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+          values: newUsers,
+        },
+      })
+  } catch (err) {
+    return console.error(JSON.stringify(err))
+  }
+  //.then(res => console.info(res.status, res.statusText))
 }
 
 // processUsers()
