@@ -1,11 +1,14 @@
 const { processUsers } = require('../index')
+const { fetchUsers } = require('../lib/fetch-cognito-users')
 const { success, failure } = require('../lib/response')
 
-export async function handler(event, context, callback) {
+export async function handler(event, context) {
   try {
-    processUsers()
-    callback(null, success({ msg: 'success' }))
+    const users = await fetchUsers()
+    const result = processUsers(users)
+    console.log(result)
+    return success(users)
   } catch (err) {
-    callback(null, failure(err))
+    return failure(JSON.stringify(err))
   }
 }

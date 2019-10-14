@@ -3,7 +3,6 @@ require('dotenv').config()
 const fs = require('fs')
 const readline = require('readline')
 const { google } = require('googleapis')
-const { fetchUsers } = require('./lib/fetch-cognito-users')
 
 const TOKEN_PATH = 'token.json'
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -24,13 +23,6 @@ const CREDENTIALS = {
 
 function processUsers(cognitoUsers) {
   return authorize(CREDENTIALS, addNewUsers, cognitoUsers)
-  // Load client secrets from a local file.
-  // fs.readFile('credentials.json', (err, content) => {
-  //   if (err) return console.log('Error loading client secret file:', err)
-  //   // Authorize a client with credentials, then call the Google Sheets API.
-  //   console.log(JSON.parse(content))
-  //   authorize(JSON.parse(content), addNewUsers)
-  // })
 }
 
 /**
@@ -51,7 +43,7 @@ function authorize(credentials, callback, cognitoUsers) {
   fs.readFile(TOKEN_PATH, (err, token) => {
     if (err) return getNewToken(oAuth2Client, callback)
     oAuth2Client.setCredentials(JSON.parse(token))
-    callback(oAuth2Client, cognitoUsers)
+    return callback(oAuth2Client, cognitoUsers)
   })
 }
 
@@ -98,46 +90,44 @@ async function addNewUsers(auth, users) {
       spreadsheetId: SPREADSHEET_ID,
       range: 'Users!F2:F',
     },
-    (err, res) => {
+    async (err, res) => {
       if (err) return console.error('The API returned an error: ' + err)
       const emails = res.data.values
-        // fs.readFile(USERS_JSON, { encoding: 'utf8' }, (err, data) => {
-        //   if (err) throw err
-        // let Data = JSON.parse(data)
-        if (emails.length && emails.length < users.length) {
-          let gsheetUserEmails = []
-          emails.map(email => gsheetUserEmails.push(email[0].toLowerCase()))
-          const diff = users
-            .filter(
-              user => !gsheetUserEmails.includes(user.email.toLowerCase()),
-            )
-            .map(userdata => Object.values(userdata))
-          const res = await addUsers(auth, diff)
-          return ({ diff, res })
-        }
-        return String(null)
-        // })
+      // fs.readFile(USERS_JSON, { encoding: 'utf8' }, (err, data) => {
+      //   if (err) throw err
+      // let Data = JSON.parse(data)
+      if (emails.length && emails.length < users.length) {
+        let gsheetUserEmails = []
+        emails.map(email => gsheetUserEmails.push(email[0].toLowerCase()))
+        const diff = users
+          .filter(user => !gsheetUserEmails.includes(user.email.toLowerCase()))
+          .map(userdata => Object.values(userdata))
+        const res = await addUsers(auth, diff)
+        return { diff, res }
+      }
+      return String(null)
+      // })
     },
   )
 }
 
 async function addUsers(auth, newUsers) {
-try {
-  return await google.sheets({ version: 'v4', auth }).spreadsheets.values
-  .append({
-    spreadsheetId: SPREADSHEET_ID,
-    range: 'Users!A2:F',
-    valueInputOption: 'RAW',
-    insertDataOption: 'INSERT_ROWS',
-    requestBody: {
-      values: newUsers,
-    },
-  })
-} catch(err) {
-  return console.error(JSON.stringify(err))
-}
-    //.then(res => console.info(res.status, res.statusText))
-    
+  try {
+    return await google
+      .sheets({ version: 'v4', auth })
+      .spreadsheets.values.append({
+        spreadsheetId: SPREADSHEET_ID,
+        range: 'Users!A2:F',
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+          values: newUsers,
+        },
+      })
+  } catch (err) {
+    return console.error(JSON.stringify(err))
+  }
+  //.then(res => console.info(res.status, res.statusText))
 }
 
 // processUsers()
