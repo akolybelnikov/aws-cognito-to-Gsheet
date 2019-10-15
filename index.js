@@ -85,30 +85,27 @@ function getNewToken(oAuth2Client, callback) {
  */
 async function addNewUsers(auth, users) {
   const sheets = google.sheets({ version: 'v4', auth })
-  sheets.spreadsheets.values.get(
-    {
+  try {
+    const {
+      data: { values },
+    } = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: 'Users!F2:F',
-    },
-    async (err, res) => {
-      if (err) return console.error('The API returned an error: ' + err)
-      const emails = res.data.values
-      // fs.readFile(USERS_JSON, { encoding: 'utf8' }, (err, data) => {
-      //   if (err) throw err
-      // let Data = JSON.parse(data)
-      if (emails.length && emails.length < users.length) {
-        let gsheetUserEmails = []
-        emails.map(email => gsheetUserEmails.push(email[0].toLowerCase()))
-        const diff = users
-          .filter(user => !gsheetUserEmails.includes(user.email.toLowerCase()))
-          .map(userdata => Object.values(userdata))
-        const res = await addUsers(auth, diff)
-        return { diff, res }
-      }
-      return String(null)
-      // })
-    },
-  )
+    })
+
+    if (values && values.length && values.length < users.length) {
+      let gsheetUserEmails = []
+      values.map(email => gsheetUserEmails.push(email[0].toLowerCase()))
+      const diff = users
+        .filter(user => !gsheetUserEmails.includes(user.email.toLowerCase()))
+        .map(userdata => Object.values(userdata))
+      await addUsers(auth, diff)
+      return diff.length
+    }
+    return []
+  } catch (err) {
+    if (err) return console.error('The API returned an error: ' + err)
+  }
 }
 
 async function addUsers(auth, newUsers) {
@@ -127,10 +124,7 @@ async function addUsers(auth, newUsers) {
   } catch (err) {
     return console.error(JSON.stringify(err))
   }
-  //.then(res => console.info(res.status, res.statusText))
 }
-
-// processUsers()
 
 module.exports = {
   processUsers,

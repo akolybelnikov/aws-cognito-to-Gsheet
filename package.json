@@ -15,7 +15,6 @@
     "csv-writer": "^1.5.0",
     "encoding": "^0.1.12",
     "googleapis": "39",
-    "moment": "^2.24.0",
     "netlify-lambda": "^1.6.3"
   },
   "scripts": {
