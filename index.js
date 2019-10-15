@@ -6,7 +6,6 @@ const { google } = require('googleapis')
 
 const TOKEN_PATH = 'token.json'
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-// const USERS_JSON = 'data/users.json'
 
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID
 const CREDENTIALS = {
@@ -21,8 +20,12 @@ const CREDENTIALS = {
   },
 }
 
-function processUsers(cognitoUsers) {
-  return authorize(CREDENTIALS, addNewUsers, cognitoUsers)
+function getUsersEmails() {
+  return authorize(CREDENTIALS, getEmails, null)
+}
+
+function addNewUsers(users) {
+  return authorize(CREDENTIALS, addUsers, users)
 }
 
 /**
@@ -31,7 +34,7 @@ function processUsers(cognitoUsers) {
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
-function authorize(credentials, callback, cognitoUsers) {
+function authorize(credentials, callback, options) {
   const { client_secret, client_id, redirect_uris } = credentials.installed
   const oAuth2Client = new google.auth.OAuth2(
     client_id,
@@ -41,9 +44,9 @@ function authorize(credentials, callback, cognitoUsers) {
 
   // Check if we have previously stored a token.
   fs.readFile(TOKEN_PATH, (err, token) => {
-    if (err) return getNewToken(oAuth2Client, callback)
+    if (err) return getNewToken(oAuth2Client, callback, options)
     oAuth2Client.setCredentials(JSON.parse(token))
-    return callback(oAuth2Client, cognitoUsers)
+    return callback(oAuth2Client, options)
   })
 }
 
@@ -53,7 +56,7 @@ function authorize(credentials, callback, cognitoUsers) {
  * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
  * @param {getEventsCallback} callback The callback for the authorized client.
  */
-function getNewToken(oAuth2Client, callback) {
+function getNewToken(oAuth2Client, callback, options) {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: SCOPES,
@@ -74,7 +77,7 @@ function getNewToken(oAuth2Client, callback) {
         if (err) return console.error(err)
         console.log('Token stored to', TOKEN_PATH)
       })
-      callback(oAuth2Client)
+      callback(oAuth2Client, options)
     })
   })
 }
@@ -83,35 +86,28 @@ function getNewToken(oAuth2Client, callback) {
  * Prints the users data in the spreadsheet:
  * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
  */
-async function addNewUsers(auth, users) {
+function getEmails(auth) {
+  const response = []
   const sheets = google.sheets({ version: 'v4', auth })
   sheets.spreadsheets.values.get(
     {
       spreadsheetId: SPREADSHEET_ID,
       range: 'Users!F2:F',
     },
-    async (err, res) => {
+    (err, res) => {
       if (err) return console.error('The API returned an error: ' + err)
-      const emails = res.data.values
-      // fs.readFile(USERS_JSON, { encoding: 'utf8' }, (err, data) => {
-      //   if (err) throw err
-      // let Data = JSON.parse(data)
-      if (emails.length && emails.length < users.length) {
-        let gsheetUserEmails = []
-        emails.map(email => gsheetUserEmails.push(email[0].toLowerCase()))
-        const diff = users
-          .filter(user => !gsheetUserEmails.includes(user.email.toLowerCase()))
-          .map(userdata => Object.values(userdata))
-        const res = await addUsers(auth, diff)
-        return { diff, res }
-      }
-      return String(null)
-      // })
+      response = [...res.data.values]
     },
   )
+  return response
 }
 
-async function addUsers(auth, newUsers) {
+/**
+ * Prints the users data in the spreadsheet:
+ * @param {{[string]}} newUsers New users data.
+ * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
+ */
+async function addUsers(auth, users) {
   try {
     return await google
       .sheets({ version: 'v4', auth })
@@ -121,17 +117,15 @@ async function addUsers(auth, newUsers) {
         valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
         requestBody: {
-          values: newUsers,
+          values: users,
         },
       })
   } catch (err) {
     return console.error(JSON.stringify(err))
   }
-  //.then(res => console.info(res.status, res.statusText))
 }
 
-// processUsers()
-
 module.exports = {
-  processUsers,
+  getUsersEmails,
+  addNewUsers
 }

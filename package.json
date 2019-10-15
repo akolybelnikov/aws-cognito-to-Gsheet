@@ -1,7 +1,6 @@
 {
   "name": "cognito_to_gsheet",
   "version": "1.0.0",
-  "main": "index.js",
   "author": {
     "email": "a.kolybelnikov@gmail.com",
     "name": "Andrey Kolybelnikov"
