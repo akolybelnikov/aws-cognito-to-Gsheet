@@ -1,7 +1,7 @@
 {
   "name": "cognito_to_gsheet",
-  "version": "1.0.0",
-  "main": "index.js",
+  "description": "a simple app to fetch users from a cognito user pool and render them into a g-sheet",
+  "version": "0.0.1",
   "author": {
     "email": "a.kolybelnikov@gmail.com",
     "name": "Andrey Kolybelnikov"
@@ -15,13 +15,39 @@
     "csv-writer": "^1.5.0",
     "encoding": "^0.1.12",
     "googleapis": "39",
-    "netlify-lambda": "^1.6.3"
+    "netlify-lambda": "^1.6.3",
+    "compression": "^1.7.1",
+    "polka": "next",
+    "sirv": "^0.4.0"
   },
   "scripts": {
     "build": "netlify-lambda build lambda",
-    "serve": "netlify-lambda serve lambda"
+    "build:all": "netlify-lambda build lambda && sapper export --legacy",
+    "serve": "netlify-lambda serve lambda",
+    "dev": "sapper dev",
+    "build:sapper": "sapper build --legacy",
+    "export": "sapper export --legacy",
+    "start": "node __sapper__/build",
+    "cy:run": "cypress run",
+    "cy:open": "cypress open",
+    "test": "run-p --race dev cy:run"
   },
   "devDependencies": {
-    "dotenv": "^8.1.0"
+    "dotenv": "^8.1.0",
+    "npm-run-all": "^4.1.5",
+    "sapper": "^0.27.0",
+    "svelte": "^3.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@babel/plugin-transform-runtime": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/runtime": "^7.0.0",
+    "rollup": "^1.12.0",
+    "rollup-plugin-babel": "^4.0.2",
+    "rollup-plugin-commonjs": "^10.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-replace": "^2.0.0",
+    "rollup-plugin-svelte": "^5.0.1",
+    "rollup-plugin-terser": "^4.0.4"
   }
 }

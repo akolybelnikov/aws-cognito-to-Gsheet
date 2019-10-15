@@ -1,3 +1,4 @@
 [build]
-  command = "yarn build"
-  functions = "./functions" # netlify-lambda builds to this folder AND Netlify reads functions from here
+  command = "yarn build:all"
+  functions = "api" # netlify-lambda builds to this folder AND Netlify reads functions from here
+  publish = "__sapper__/export"
