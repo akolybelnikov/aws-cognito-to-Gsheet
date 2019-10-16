@@ -1,10 +1,10 @@
 <script>
 	import { onMount } from 'svelte';
 
-	let emails = {};
+	// let emails = [];
 
 	onMount(async () => {
-    const emails = await fetch(`/.netlify/api/users`);
+    let emails = await fetch(`/.netlify/functions/users`);
     console.log(emails)
 	});
 </script>
@@ -57,12 +57,7 @@
 </svelte:head>
 
 <div class="emails">
-	{#each emails as email}
-		<p>email</p>
-	{:else}
-		<!-- this block renders when photos.length === 0 -->
-		<p>loading...</p>
-	{/each}
+
 </div>
 
 <div class="button">
