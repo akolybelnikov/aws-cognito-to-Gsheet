@@ -10,10 +10,8 @@ yarn-error.log
 
 # google credentials
 credentials.json
-token.json
-
-# generated files
-data
 
 # built lambda functions
 functions
+
+Quickstart-b30027126257.json
