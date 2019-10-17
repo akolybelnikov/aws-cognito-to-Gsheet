@@ -6,7 +6,9 @@
 
   onMount(async () => {
     let res = await fetch(`/.netlify/functions/users`);
-    users = await res.json();
+    const resJSON = await res.json();
+    if (resJSON.msg && resJSON.msg === "success")
+      users = [...users, ...resJSON.body];
     loading = false;
   });
 </script>
@@ -45,6 +47,11 @@
     text-align: center;
   }
 
+  div.emails {
+    min-height: 200px;
+    padding-block-start: 20%;
+  }
+
   ol {
     max-width: 80%;
     text-align: left;
@@ -62,7 +69,6 @@
   }
 
   div.spinner {
-    height: 200px;
     position: relative;
   }
 
@@ -71,7 +77,7 @@
     box-sizing: border-box;
     position: absolute;
     top: 50%;
-    left: 50%;
+    left: calc(50% - 15px);
     width: 50px;
     height: 50px;
     margin-top: -10px;

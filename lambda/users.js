@@ -5,9 +5,8 @@ const { success, failure } = require('../lib/response')
 export async function handler(event, context) {
   try {
     const users = await fetchUsers()
-    console.log(users)
     const emails = await getUsers()
-    console.log(emails)
+
     if (users.length && emails.length && emails.length < users.length) {
       let diff = users.filter(
         user => !emails.includes(user.email.toLowerCase()),
@@ -15,10 +14,12 @@ export async function handler(event, context) {
       let data = diff.map(userdata => Object.values(userdata))
       await addUsers(data)
 
-      return success(diff)
+      return success({ msg: 'success', body: diff })
     }
-    return success([])
+
+    return success({ msg: 'success', body: [] })
   } catch (err) {
-    return failure(err)
+    console.error(err)
+    return failure({ msg: 'failure', error: err })
   }
 }
