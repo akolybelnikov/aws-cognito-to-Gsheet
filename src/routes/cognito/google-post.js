@@ -1,5 +1,4 @@
-require('dotenv').config()
-const { google } = require('googleapis')
+import { google } from 'googleapis'
 
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID
 const API_KEY = process.env.API_KEY
