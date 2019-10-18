@@ -23,11 +23,8 @@
     "sirv": "^0.4.0"
   },
   "scripts": {
-    "build": "netlify-lambda build lambda",
-    "build:all": "netlify-lambda build lambda && sapper export",
-    "serve": "netlify-lambda serve lambda",
     "dev": "sapper dev",
-    "build:sapper": "sapper build",
+    "build": "sapper build",
     "export": "sapper export",
     "start": "node __sapper__/build",
     "cy:run": "cypress run",
