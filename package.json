@@ -22,7 +22,7 @@
   },
   "scripts": {
     "dev": "sapper dev",
-    "build": "ls && sapper build && cp credentials.json /var/task/",
+    "build": "ls && sapper build",
     "export": "sapper export --legacy",
     "start": "node __sapper__/build",
     "cy:run": "cypress run",
