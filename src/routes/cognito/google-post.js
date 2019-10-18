@@ -1,5 +1,4 @@
-require('dotenv').config()
-const { google } = require('googleapis')
+import { google } from 'googleapis'
 
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID
 const API_KEY = process.env.API_KEY
@@ -10,7 +9,6 @@ const auth = new google.auth.GoogleAuth({
 })
 
 export async function post(req, res, next) {
-  console.log(req.body)
   const client = await auth.getClient()
   const sheets = google.sheets({ version: 'v4', auth: client })
   const gsheet_res = await sheets.spreadsheets.values.append({

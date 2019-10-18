@@ -1,0 +1,7 @@
+__sapper__
+cypress
+node_modules
+functions
+lambda
+lib
+netlify.toml

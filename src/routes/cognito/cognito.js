@@ -1,5 +1,4 @@
-require('dotenv').config()
-const AWS = require('aws-sdk')
+import AWS from 'aws-sdk'
 
 export async function get(req, res, next) {
   AWS.config.update({
