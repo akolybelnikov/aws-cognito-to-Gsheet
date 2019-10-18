@@ -7,7 +7,7 @@
   onMount(async () => {
     let res = await fetch(`/.netlify/functions/users`);
     const resJSON = await res.json();
-    if (resJSON.msg && resJSON.msg === "success")
+    if (resJSON.body && resJSON.msg === "success")
       users = [...users, ...resJSON.body];
     loading = false;
   });
