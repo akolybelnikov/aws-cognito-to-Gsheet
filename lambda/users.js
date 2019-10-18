@@ -17,9 +17,8 @@ export async function handler(event, context) {
       return success({ msg: 'success', body: diff })
     }
 
-    return success({ msg: 'success', body: [] })
+    return success({ msg: 'success' })
   } catch (err) {
-    console.error(err)
-    return failure({ msg: 'failure', error: err })
+    return failure({ msg: 'failure' })
   }
 }

@@ -1,21 +1,53 @@
+<script context="module">
+  export async function preload() {
+    const cognito_request = this.fetch("/cognito/cognito");
+    const google_request = this.fetch("/cognito/google-fetch");
+
+    const cognito = await cognito_request;
+    const google = await google_request;
+
+    const cognito_users = await cognito.json();
+    const google_users = await google.json();
+
+    const users = [];
+
+    if (
+      cognito_users.length &&
+      google_users.length &&
+      google_users.length < cognito_users.length
+    ) {
+      let diff = cognito_users.filter(
+        user => !google_users.includes(user.email.toLowerCase())
+      );
+      let data = diff.map(userdata => Object.values(userdata));
+      await this.fetch("/cognito/google-post", {
+        method:'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      return { users: diff };
+    }
+
+    return { users };
+  }
+</script>
+
 <script>
   import { onMount } from "svelte";
 
   let loading = true;
-  let users = [];
+  export let users;
 
-  onMount(async () => {
-    let res = await fetch(`/.netlify/functions/users`);
-    const resJSON = await res.json();
-    if (resJSON.msg && resJSON.msg === "success")
-      users = [...users, ...resJSON.body];
-    loading = false;
+  onMount(() => {
+    if (users) loading = false;
   });
 </script>
 
 <style>
-  h2,
-  h3 {
+  h2 {
     text-align: center;
   }
 
@@ -56,6 +88,10 @@
     max-width: 80%;
     text-align: left;
     margin: 0 auto;
+  }
+
+  li {
+    margin-block-end: 1rem;
   }
 
   blockquote {
@@ -104,9 +140,9 @@
           <blockquote>
             name: {cat.name}
             <br />
-            phone_number: {cat.phone_number}
+            created: {cat.created}
             <br />
-            email: {cat.email}
+            email verified: {cat.email_verified}
           </blockquote>
         </li>
       {/each}
