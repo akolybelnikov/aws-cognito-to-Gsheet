@@ -6,10 +6,11 @@
 
   onMount(async () => {
     let res = await fetch(`/.netlify/functions/users`);
-    const resJSON = await res.json();
-    const {body, msg} = resJSON;
+    let resJson = await res.json();
+    const { body, msg } = resJson;
+
     if (body && msg === "success") {
-      users = [...users, ...[JSON.parse(body)]];
+      users = [...users, ...Object.values(body)];
     }
     loading = false;
   });
@@ -60,6 +61,10 @@
     margin: 0 auto;
   }
 
+  li {
+    margin-block-end: 1rem;
+  }
+
   blockquote {
     background: #eee;
   }
@@ -104,11 +109,11 @@
       {#each users as cat}
         <li>
           <blockquote>
+            date: {cat.created}
+            <br />
             name: {cat.name}
             <br />
-            phone_number: {cat.phone_number}
-            <br />
-            email: {cat.email}
+            verified: {cat.verified}
           </blockquote>
         </li>
       {/each}

@@ -11,17 +11,24 @@ export async function handler(event, context) {
       const diff = users.filter(
         user => !emails.includes(user.email.toLowerCase())
       );
+
       const data = diff.map(userdata => Object.values(userdata));
       await addUsers(data);
 
-      const dataJson = diff.map(user => JSON.stringify(user));
-      const dataString = dataJson.join(",");
+      const response_data = diff.reduce((acc, curr, i) => {
+        acc[i] = {
+          created: curr.created,
+          name: curr.name,
+          verified: curr.email_verified
+        };
+        return acc;
+      }, {});
 
-      return success({ msg: "success", body: dataString });
+      return success({ msg: "success", body: response_data });
     }
 
     return success({ msg: "no new users" });
   } catch (err) {
-    return failure({ msg: "failure", error: err });
+    return failure({ msg: "failure", err });
   }
 }
