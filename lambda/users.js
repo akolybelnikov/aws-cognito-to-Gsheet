@@ -22,7 +22,6 @@ export async function handler(event, context) {
 
     return success({ msg: "no new users" });
   } catch (err) {
-    console.error(JSON.stringify(err));
     return failure({ msg: "failure", error: err });
   }
 }
