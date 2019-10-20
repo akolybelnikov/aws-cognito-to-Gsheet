@@ -1,10 +1,24 @@
 <script>
+  import { goto } from "@sapper/app";
   import { onMount } from "svelte";
 
   let loading = true;
   let users = [];
-
+  let identity;
+  
   onMount(async () => {
+    if (window.netlifyIdentity) {
+      identity = window.netlifyIdentity
+      window.netlifyIdentity.on("init", async user => {
+        if (user) {
+          console.log(user)
+          return await fetchUsers();
+        }
+      });
+    }
+  });
+
+  async function fetchUsers() {
     let res = await fetch(`/.netlify/functions/users`);
     let resJson = await res.json();
     const { body, msg } = resJson;
@@ -13,7 +27,9 @@
       users = [...users, ...Object.values(body)];
     }
     loading = false;
-  });
+  }
+
+  export let user = identity.currentUser();
 </script>
 
 <style>
@@ -98,32 +114,40 @@
 
 <svelte:head>
   <title>Users</title>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js">
+
+  </script>
 </svelte:head>
 
 <div class="emails">
-  {#if loading}
-    <div class="spinner" />
-  {:else if users.length}
-    <h2>There are new users:</h2>
-    <ol class="list-decimal">
-      {#each users as cat}
-        <li>
-          <blockquote>
-            date: {cat.created}
-            <br />
-            name: {cat.name}
-            <br />
-            verified: {cat.verified}
-          </blockquote>
-        </li>
-      {/each}
-    </ol>
-    {#if users.length}
-      <h3>We have put them in the Google table</h3>
+  {#if user}
+    {#if loading}
+      <div class="spinner" />
+    {:else if users.length}
+      <h2>There are new users:</h2>
+      <ol class="list-decimal">
+        {#each users as cat}
+          <li>
+            <blockquote>
+              date: {cat.created}
+              <br />
+              name: {cat.name}
+              <br />
+              verified: {cat.verified}
+            </blockquote>
+          </li>
+        {/each}
+      </ol>
+      {#if users.length}
+        <h3>We have put them in the Google table</h3>
+      {/if}
+    {:else}
+      <h2>There are no new users...</h2>
     {/if}
   {:else}
-    <h2>There are no new users...</h2>
+    <p>You are not logged in.</p>
   {/if}
+
 </div>
 
 <div class="button">

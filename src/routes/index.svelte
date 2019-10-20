@@ -1,3 +1,19 @@
+<script>
+  const { netlifyIdentity } = window;
+
+  function handleUserAction(action) {
+    if (action == "login" || action == "signup") {
+      netlifyIdentity.open(action);
+      netlifyIdentity.on("login", user => {
+        netlifyIdentity.close();
+      });
+    } else if (action == "logout") {
+      netlifyIdentity.logout();
+    }
+  }
+  export let user = netlifyIdentity.currentUser();
+</script>
+
 <style>
   h1,
   figure {
@@ -28,7 +44,7 @@
     }
   }
 
-  div.button {
+  div.holder {
     margin: 0 auto;
     padding: 1rem 0;
     width: 100%;
@@ -38,8 +54,10 @@
 
 <svelte:head>
   <title>Great success!</title>
-</svelte:head>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js">
 
+  </script>
+</svelte:head>
 <h1>Great success!</h1>
 
 <figure>
@@ -47,11 +65,39 @@
   <figcaption>HIGH FIVE!</figcaption>
 </figure>
 
-<div class="button">
-  <a
-    href="users"
-    class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
-    border border-gray-400 rounded shadow outline-none focus:outline-none">
-    Check users
-  </a>
-</div>
+{#if user}
+  <div class="holder">
+    <a
+      href="users"
+      class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
+      border border-gray-400 rounded shadow outline-none focus:outline-none">
+      Check users
+    </a>
+    <div>
+      <button
+        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
+        border border-gray-400 rounded shadow outline-none focus:outline-none"
+        on:click={() => handleUserAction('logout')}>
+        Log Out
+      </button>
+    </div>
+  </div>
+{:else}
+  <div class="holder">
+    <p>You are not logged in.</p>
+    <div>
+      <button
+        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
+        border border-gray-400 rounded shadow outline-none focus:outline-none"
+        on:click={() => handleUserAction('login')}>
+        Log In
+      </button>
+      <button
+        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
+        border border-gray-400 rounded shadow outline-none focus:outline-none"
+        on:click={() => handleUserAction('signup')}>
+        Sign Up
+      </button>
+    </div>
+  </div>
+{/if}
