@@ -98,7 +98,7 @@
 </figure>
 
 {#if process.browser}
-  <p>Your are: {$currentUser}</p>
+  <p>Your are: {$user}</p>
 {/if}
 
 {#if loggedIn}
