@@ -74,6 +74,8 @@
   <title>Great success!</title>
 </svelte:head>
 
+<div data-netlify-identity-menu></div>
+
 <h1>Great success!</h1>
 
 <figure>
