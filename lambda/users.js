@@ -3,8 +3,6 @@ const { fetchUsers } = require("../lib/cognito");
 const { success, failure } = require("../lib/response");
 
 export async function handler(event, context) {
-  const {identity, user} = context.clientContext;
-  console.log(user)
   try {
     const users = await fetchUsers();
     const emails = await getUsers();
