@@ -2,12 +2,13 @@
   import { onMount } from "svelte";
   import { user } from "../store/index.js";
   import { goto } from "@sapper/app";
-  const netlifyIdentity = require("netlify-identity-widget");
+  const identity = require('netlify-identity-widget')
 
   export let loggedIn = false;
 
   onMount(() => {
     if (typeof window !== "undefined") {
+      console.log(identity)
       const { netlifyIdentity } = window;
       netlifyIdentity.on("error", err => console.error("Error", err));
       user.subscribe(() => {
@@ -32,6 +33,7 @@
       user.logout();
       netlifyIdentity.logout();
       loggedIn = false;
+      netlifyIdentity.close();
     }
   }
 </script>
@@ -81,6 +83,10 @@
 
 <svelte:head>
   <title>Great success!</title>
+  <script
+    type="text/javascript"
+    src="https://identity.netlify.com/v1/netlify-identity-widget.js">
+  </script>
 </svelte:head>
 
 <h1>Great success!</h1>
