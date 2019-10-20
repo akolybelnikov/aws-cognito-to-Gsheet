@@ -33,8 +33,6 @@
       netlifyIdentity.on("close", u => {
         user.login(u);
         loggedIn = true;
-        console.log("logged in: ", loggedIn);
-        console.log("user: ", u);
         netlifyIdentity.close();
       });
     } else if (action == "logout") {
