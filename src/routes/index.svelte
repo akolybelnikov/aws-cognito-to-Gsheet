@@ -2,11 +2,13 @@
   import { onMount } from "svelte";
   import { user } from "../store/index.js";
   import { goto } from "@sapper/app";
+  import netlifyIdentity from "netlify-identity-widget";
 
   export let loggedIn = false;
 
   onMount(() => {
     if (typeof window !== "undefined") {
+      netlifyIdentity.init()
       const { netlifyIdentity } = window;
       netlifyIdentity.on("error", err => console.error("Error", err));
       user.subscribe(() => {
@@ -80,11 +82,6 @@
 
 <svelte:head>
   <title>Great success!</title>
-  <script
-    type="text/javascript"
-    src="https://identity.netlify.com/v1/netlify-identity-widget.js">
-
-  </script>
 </svelte:head>
 
 <h1>Great success!</h1>

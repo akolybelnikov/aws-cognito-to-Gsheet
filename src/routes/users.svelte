@@ -11,7 +11,6 @@
       const { netlifyIdentity } = window;
       user.subscribe(async () => {
         if (netlifyIdentity.currentUser()) {
-          console.log(netlifyIdentity.currentUser());
           let res = await fetch(`/.netlify/functions/users`);
           let resJson = await res.json();
           const { body, msg } = resJson;
