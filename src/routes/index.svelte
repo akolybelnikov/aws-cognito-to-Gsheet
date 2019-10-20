@@ -1,21 +1,30 @@
 <script>
+
+  export let user;
   let identity;
-  if (window) {
-    const { netlifyIdentity } = window;
-    identity = netlifyIdentity;
-  }
+
+  import { onMount } from "svelte";
+  onMount(() => {
+    if (window.netlifyIdentity) {
+      identity = window.netlifyIdentity;
+      identity.on("init", user => {
+        if (!user) {
+          identity.on("login", () => (user = identity.currentUser()));
+        }
+      });
+    }
+  });
 
   function handleUserAction(action) {
     if (action == "login" || action == "signup") {
-      netlifyIdentity.open(action);
-      netlifyIdentity.on("login", user => {
-        netlifyIdentity.close();
+      identity.open(action);
+      identity.on("login", user => {
+        identity.close();
       });
     } else if (action == "logout") {
-      netlifyIdentity.logout();
+      identity.logout();
     }
   }
-  export let user = identity.currentUser();
 </script>
 
 <style>
@@ -55,17 +64,16 @@
     text-align: center;
   }
 
-  a {
+  a,
+  p {
     margin-block-end: 1rem;
   }
 </style>
 
 <svelte:head>
   <title>Great success!</title>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js">
-
-  </script>
 </svelte:head>
+
 <h1>Great success!</h1>
 
 <figure>
@@ -81,20 +89,13 @@
       border border-gray-400 rounded shadow outline-none focus:outline-none">
       Check users
     </a>
-    <div>
-      <button
-        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
-        border border-gray-400 rounded shadow outline-none focus:outline-none"
-        on:click={() => handleUserAction('logout')}>
-        Log Out
-      </button>
-    </div>
   </div>
 {:else}
   <div class="holder">
     <p>You are not logged in.</p>
     <div>
-      <button
+    <div data-netlify-identity-button>Login with Netlify Identity</div>
+      <!-- <button
         class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
         border border-gray-400 rounded shadow outline-none focus:outline-none"
         on:click={() => handleUserAction('login')}>
@@ -105,7 +106,7 @@
         border border-gray-400 rounded shadow outline-none focus:outline-none"
         on:click={() => handleUserAction('signup')}>
         Sign Up
-      </button>
+      </button> -->
     </div>
   </div>
 {/if}

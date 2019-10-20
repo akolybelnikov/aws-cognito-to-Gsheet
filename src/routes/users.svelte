@@ -5,13 +5,15 @@
   let loading = true;
   let users = [];
   let identity;
-  
+  let user;
+
   onMount(async () => {
-    if (window && window.netlifyIdentity) {
-      identity = window.netlifyIdentity
+    if (window.netlifyIdentity) {
+      identity = window.netlifyIdentity;
+      user = identity.currentUser();
       window.netlifyIdentity.on("init", async user => {
         if (user) {
-          console.log(user)
+          console.log(user);
           return await fetchUsers();
         }
       });
@@ -28,8 +30,6 @@
     }
     loading = false;
   }
-
-  export let user = identity.currentUser();
 </script>
 
 <style>
@@ -114,9 +114,6 @@
 
 <svelte:head>
   <title>Users</title>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js">
-
-  </script>
 </svelte:head>
 
 <div class="emails">
