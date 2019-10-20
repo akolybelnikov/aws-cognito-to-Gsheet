@@ -3,7 +3,6 @@ import { writable } from "svelte/store";
 function createUser() {
   if (typeof window !== "undefined") {
     const localUser = JSON.parse(localStorage.getItem("gotrue.user"));
-    console.log('local user on init', localUser)
     let u = null;
     if (localUser) {
       u = {
@@ -28,31 +27,15 @@ function createUser() {
           refresh_token: user.token.refresh_token,
           token_type: user.token.token_type
         };
-        console.log('local user on login', localUser)
+        console.log("local user on login", localUser);
         set(currentUser);
       },
       logout() {
-        console.log('logging out ...')
+        console.log("logging out ...");
         set(null);
       }
     };
-  } else {
-    console.log('no window object')
   }
 }
 
-// function createRedirectURL() {
-//   const { subscribe, set } = writable("");
-//   return {
-//     subscribe,
-//     setRedirectURL(url) {
-//       set(url);
-//     },
-//     clearRedirectURL() {
-//       set("");
-//     }
-//   };
-// }
-
 export const user = createUser();
-// export const redirectURL = createRedirectURL();

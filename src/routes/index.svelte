@@ -1,28 +1,36 @@
 <script>
   import { onMount } from "svelte";
-  import netlifyIdentity from "netlify-identity-widget";
+  // import netlifyIdentity from "netlify-identity-widget";
   import { user } from "../store/index.js";
   import { goto } from "@sapper/app";
 
   export let loggedIn = false;
+  export let currentUser = null;
 
   onMount(() => {
     if (typeof window !== "undefined") {
-      netlifyIdentity.init();
+      const { netlifyIdentity } = window;
       console.log("identity: ", netlifyIdentity);
       netlifyIdentity.on("init", function(e) {
         console.log("on init: ", e);
       });
+      netlifyIdentity.on("init", user => console.log("init", user));
+      netlifyIdentity.on("login", user => console.log("login", user));
+      netlifyIdentity.on("logout", () => console.log("Logged out"));
+      netlifyIdentity.on("error", err => console.error("Error", err));
+      netlifyIdentity.on("open", () => console.log("Widget opened"));
+      netlifyIdentity.on("close", () => console.log("Widget closed"));
       const localUser = JSON.parse(localStorage.getItem("gotrue.user"));
       loggedIn = !!localUser;
-      console.log("logged in: ", loggedIn);
+      currentUser = netlifyIdentity.currentUser();
     }
   });
 
   function handleUserAction(action) {
+    const { netlifyIdentity } = window;
     if (action == "login" || action == "signup") {
       netlifyIdentity.open(action);
-      netlifyIdentity.on("login", u => {
+      netlifyIdentity.on("close", u => {
         user.login(u);
         loggedIn = true;
         console.log("logged in: ", loggedIn);
@@ -90,6 +98,10 @@
   <img alt="Borat" src="great-success.png" />
   <figcaption>HIGH FIVE!</figcaption>
 </figure>
+
+{#if process.browser}
+  <p>Your are: {$currentUser}</p>
+{/if}
 
 {#if loggedIn}
   <div class="holder flex flex-col">

@@ -2,13 +2,13 @@
   import { goto } from "@sapper/app";
   import { onMount } from "svelte";
   import netlifyIdentity from "netlify-identity-widget";
-  import { user } from "../store/index.js";
 
   let loading = true;
   let users = [];
 
   onMount(async () => {
     if (typeof window !== "undefined") {
+      const user = JSON.parse(localStorage.getItem("gotrue.user"));
       if (user) {
         console.log(user);
         let res = await fetch(`/.netlify/functions/users`);
@@ -24,17 +24,6 @@
       }
     }
   });
-
-  async function fetchUsers() {
-    let res = await fetch(`/.netlify/functions/users`);
-    let resJson = await res.json();
-    const { body, msg } = resJson;
-
-    if (body && msg === "success") {
-      users = [...users, ...Object.values(body)];
-    }
-    loading = false;
-  }
 </script>
 
 <style>
