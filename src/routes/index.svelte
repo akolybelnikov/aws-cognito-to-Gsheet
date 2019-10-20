@@ -1,5 +1,9 @@
 <script>
-  const { netlifyIdentity } = window;
+  let identity;
+  if (window) {
+    const { netlifyIdentity } = window;
+    identity = netlifyIdentity;
+  }
 
   function handleUserAction(action) {
     if (action == "login" || action == "signup") {
@@ -11,7 +15,7 @@
       netlifyIdentity.logout();
     }
   }
-  export let user = netlifyIdentity.currentUser();
+  export let user = identity.currentUser();
 </script>
 
 <style>
@@ -49,6 +53,10 @@
     padding: 1rem 0;
     width: 100%;
     text-align: center;
+  }
+
+  a {
+    margin-block-end: 1rem;
   }
 </style>
 

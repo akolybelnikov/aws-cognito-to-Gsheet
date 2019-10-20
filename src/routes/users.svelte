@@ -7,7 +7,7 @@
   let identity;
   
   onMount(async () => {
-    if (window.netlifyIdentity) {
+    if (window && window.netlifyIdentity) {
       identity = window.netlifyIdentity
       window.netlifyIdentity.on("init", async user => {
         if (user) {
