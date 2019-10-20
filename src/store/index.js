@@ -27,7 +27,7 @@ function createUser() {
           refresh_token: user.token.refresh_token,
           token_type: user.token.token_type
         };
-        console.log("local user on login", localUser);
+        console.log("local user on login", currentUser);
         set(currentUser);
       },
       logout() {

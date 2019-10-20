@@ -111,32 +111,28 @@
 </svelte:head>
 
 <div class="emails">
-  {#if user}
-    {#if loading}
-      <div class="spinner" />
-    {:else if users.length}
-      <h2>There are new users:</h2>
-      <ol class="list-decimal">
-        {#each users as cat}
-          <li>
-            <blockquote>
-              date: {cat.created}
-              <br />
-              name: {cat.name}
-              <br />
-              verified: {cat.verified}
-            </blockquote>
-          </li>
-        {/each}
-      </ol>
-      {#if users.length}
-        <h3>We have put them in the Google table</h3>
-      {/if}
-    {:else}
-      <h2>There are no new users...</h2>
+  {#if loading}
+    <div class="spinner" />
+  {:else if users.length}
+    <h2>There are new users:</h2>
+    <ol class="list-decimal">
+      {#each users as cat}
+        <li>
+          <blockquote>
+            date: {cat.created}
+            <br />
+            name: {cat.name}
+            <br />
+            verified: {cat.verified}
+          </blockquote>
+        </li>
+      {/each}
+    </ol>
+    {#if users.length}
+      <h3>We have put them in the Google table</h3>
     {/if}
   {:else}
-    <p>You are not logged in.</p>
+    <h2>There are no new users...</h2>
   {/if}
 
 </div>

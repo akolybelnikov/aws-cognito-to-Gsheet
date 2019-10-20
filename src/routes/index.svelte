@@ -1,6 +1,5 @@
 <script>
   import { onMount } from "svelte";
-  // import netlifyIdentity from "netlify-identity-widget";
   import { user } from "../store/index.js";
   import { goto } from "@sapper/app";
 
@@ -11,11 +10,9 @@
     if (typeof window !== "undefined") {
       const { netlifyIdentity } = window;
       console.log("identity: ", netlifyIdentity);
-      netlifyIdentity.on("init", function(e) {
-        console.log("on init: ", e);
-      });
-      netlifyIdentity.on("init", user => console.log("init", user));
-      netlifyIdentity.on("login", user => console.log("login", user));
+      netlifyIdentity.init()
+      netlifyIdentity.on("init", u => console.log("init", u));
+      
       netlifyIdentity.on("logout", () => console.log("Logged out"));
       netlifyIdentity.on("error", err => console.error("Error", err));
       netlifyIdentity.on("open", () => console.log("Widget opened"));
@@ -30,7 +27,8 @@
     const { netlifyIdentity } = window;
     if (action == "login" || action == "signup") {
       netlifyIdentity.open(action);
-      netlifyIdentity.on("close", u => {
+      netlifyIdentity.on("login", u => {
+        console.log('logging in ...')
         user.login(u);
         loggedIn = true;
         netlifyIdentity.close();
@@ -97,9 +95,9 @@
   <figcaption>HIGH FIVE!</figcaption>
 </figure>
 
-{#if process.browser}
-  <p>Your are: {$user}</p>
-{/if}
+<!-- {#if process.browser}
+  <p>Your are: {$user.currentUser()}</p>
+{/if} -->
 
 {#if loggedIn}
   <div class="holder flex flex-col">
