@@ -2,14 +2,11 @@
   import { onMount } from "svelte";
   import { user } from "../store/index.js";
   import { goto } from "@sapper/app";
-  import * as identity from 'netlify-identity-widget'
-
+  
   export let loggedIn = false;
 
   onMount(() => {
     if (typeof window !== "undefined") {
-      identity.init()
-      identity.on('init', () => console.log('initiated from module'))
       const { netlifyIdentity } = window;
       netlifyIdentity.on("error", err => console.error("Error", err));
       user.subscribe(() => {
