@@ -4,20 +4,13 @@
   import { goto } from "@sapper/app";
 
   export let loggedIn = false;
-  export let currentUser = null;
 
   onMount(() => {
     if (typeof window !== "undefined") {
       const { netlifyIdentity } = window;
-      console.log("identity: ", netlifyIdentity);
       netlifyIdentity.on("error", err => console.error("Error", err));
-      netlifyIdentity.on("open", () => console.log("Widget opened"));
-      netlifyIdentity.on("close", () => console.log("Widget closed"));
-      const localUser = JSON.parse(localStorage.getItem("gotrue.user"));
-      loggedIn = !!localUser;
-      currentUser = netlifyIdentity.currentUser();
-      user.subscribe(u => {
-        console.log("user subscription:", u);
+      user.subscribe(() => {
+        loggedIn = !!netlifyIdentity.currentUser();
         netlifyIdentity.close();
       });
     }
@@ -28,11 +21,9 @@
     if (action == "login" || action == "signup") {
       netlifyIdentity.open(action);
       netlifyIdentity.on("login", u => {
-        console.log("logging in ...");
         user.login(u);
-        loggedIn = true;
-        user.subscribe(u => {
-          console.log("user subscription:", netlifyIdentity.currentUser());
+        user.subscribe(() => {
+          loggedIn = !!netlifyIdentity.currentUser();
           netlifyIdentity.close();
         });
       });
@@ -102,10 +93,6 @@
   <img alt="Borat" src="great-success.png" />
   <figcaption>HIGH FIVE!</figcaption>
 </figure>
-
-<!-- {#if process.browser}
-  <p>Your are: {$user.currentUser()}</p>
-{/if} -->
 
 {#if loggedIn}
   <div class="holder flex flex-col">
