@@ -1,20 +1,21 @@
 <script>
   import { goto } from "@sapper/app";
   import { onMount } from "svelte";
+  import netlifyIdentity from "netlify-identity-widget";
+  import { user } from "../store/index.js";
 
   let loading = true;
   let users = [];
-  let identity;
-  let user;
 
   onMount(async () => {
-    if (window.netlifyIdentity) {
-      identity = window.netlifyIdentity;
-      user = identity.currentUser();
-      window.netlifyIdentity.on("init", async user => {
-        if (user) {
-          console.log(user);
+    if (typeof window !== "undefined") {
+      netlifyIdentity.init();
+      window.netlifyIdentity.on("init", async u => {
+        if (u) {
+          console.log(u);
           return await fetchUsers();
+        } else {
+          goto("/");
         }
       });
     }

@@ -1,30 +1,28 @@
 <script>
-
-  export let user;
-  let identity;
-
   import { onMount } from "svelte";
+  import netlifyIdentity from "netlify-identity-widget";
+  import { user } from "../store/index.js";
+
   onMount(() => {
-    if (window.netlifyIdentity) {
-      identity = window.netlifyIdentity;
-      identity.on("init", user => {
-        if (!user) {
-          identity.on("login", () => (user = identity.currentUser()));
-        }
-      });
+    if (typeof window !== "undefined") {
+      netlifyIdentity.init();
     }
   });
 
   function handleUserAction(action) {
     if (action == "login" || action == "signup") {
-      identity.open(action);
-      identity.on("login", user => {
-        identity.close();
+      netlifyIdentity.open(action);
+      netlifyIdentity.on("login", u => {
+        user.login(u);
+        netlifyIdentity.close();
       });
     } else if (action == "logout") {
-      identity.logout();
+      user.logout();
+      netlifyIdentity.logout();
     }
   }
+
+  export let loggedIn = !!user;
 </script>
 
 <style>
@@ -74,8 +72,6 @@
   <title>Great success!</title>
 </svelte:head>
 
-<div data-netlify-identity-menu></div>
-
 <h1>Great success!</h1>
 
 <figure>
@@ -96,7 +92,7 @@
   <div class="holder">
     <p>You are not logged in.</p>
     <div>
-    <div data-netlify-identity-button>Login with Netlify Identity</div>
+      <div data-netlify-identity-button>Login with Netlify Identity</div>
       <!-- <button
         class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
         border border-gray-400 rounded shadow outline-none focus:outline-none"
