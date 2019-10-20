@@ -2,10 +2,20 @@
   import { onMount } from "svelte";
   import netlifyIdentity from "netlify-identity-widget";
   import { user } from "../store/index.js";
+  import { goto } from "@sapper/app";
+
+  export let loggedIn = false;
 
   onMount(() => {
     if (typeof window !== "undefined") {
       netlifyIdentity.init();
+      console.log("identity: ", netlifyIdentity);
+      netlifyIdentity.on("init", function(e) {
+        console.log("on init: ", e);
+      });
+      const localUser = JSON.parse(localStorage.getItem("gotrue.user"));
+      loggedIn = !!localUser;
+      console.log("logged in: ", loggedIn);
     }
   });
 
@@ -14,15 +24,17 @@
       netlifyIdentity.open(action);
       netlifyIdentity.on("login", u => {
         user.login(u);
+        loggedIn = true;
+        console.log("logged in: ", loggedIn);
+        console.log("user: ", u);
         netlifyIdentity.close();
       });
     } else if (action == "logout") {
       user.logout();
       netlifyIdentity.logout();
+      loggedIn = false;
     }
   }
-
-  export let loggedIn = !!user;
 </script>
 
 <style>
@@ -79,32 +91,31 @@
   <figcaption>HIGH FIVE!</figcaption>
 </figure>
 
-{#if user}
-  <div class="holder">
+{#if loggedIn}
+  <div class="holder flex flex-col">
     <a
       href="users"
       class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
       border border-gray-400 rounded shadow outline-none focus:outline-none">
       Check users
     </a>
+    <button
+      class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
+      border border-gray-400 rounded shadow outline-none focus:outline-none"
+      on:click={() => handleUserAction('logout')}>
+      Log out
+    </button>
   </div>
 {:else}
   <div class="holder">
     <p>You are not logged in.</p>
     <div>
-      <div data-netlify-identity-button>Login with Netlify Identity</div>
-      <!-- <button
+      <button
         class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
         border border-gray-400 rounded shadow outline-none focus:outline-none"
         on:click={() => handleUserAction('login')}>
         Log In
       </button>
-      <button
-        class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4
-        border border-gray-400 rounded shadow outline-none focus:outline-none"
-        on:click={() => handleUserAction('signup')}>
-        Sign Up
-      </button> -->
     </div>
   </div>
 {/if}

@@ -9,15 +9,19 @@
 
   onMount(async () => {
     if (typeof window !== "undefined") {
-      netlifyIdentity.init();
-      window.netlifyIdentity.on("init", async u => {
-        if (u) {
-          console.log(u);
-          return await fetchUsers();
-        } else {
-          goto("/");
+      if (user) {
+        console.log(user);
+        let res = await fetch(`/.netlify/functions/users`);
+        let resJson = await res.json();
+        const { body, msg } = resJson;
+
+        if (body && msg === "success") {
+          users = [...users, ...Object.values(body)];
         }
-      });
+        loading = false;
+      } else {
+        goto("/");
+      }
     }
   });
 
