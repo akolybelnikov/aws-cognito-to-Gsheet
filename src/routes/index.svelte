@@ -10,16 +10,16 @@
     if (typeof window !== "undefined") {
       const { netlifyIdentity } = window;
       console.log("identity: ", netlifyIdentity);
-      netlifyIdentity.init()
-      netlifyIdentity.on("init", u => console.log("init", u));
-      
-      netlifyIdentity.on("logout", () => console.log("Logged out"));
       netlifyIdentity.on("error", err => console.error("Error", err));
       netlifyIdentity.on("open", () => console.log("Widget opened"));
       netlifyIdentity.on("close", () => console.log("Widget closed"));
       const localUser = JSON.parse(localStorage.getItem("gotrue.user"));
       loggedIn = !!localUser;
       currentUser = netlifyIdentity.currentUser();
+      user.subscribe(u => {
+        console.log("user subscription:", u);
+        netlifyIdentity.close();
+      });
     }
   });
 
@@ -28,10 +28,13 @@
     if (action == "login" || action == "signup") {
       netlifyIdentity.open(action);
       netlifyIdentity.on("login", u => {
-        console.log('logging in ...')
+        console.log("logging in ...");
         user.login(u);
         loggedIn = true;
-        netlifyIdentity.close();
+        user.subscribe(u => {
+          console.log("user subscription:", netlifyIdentity.currentUser());
+          netlifyIdentity.close();
+        });
       });
     } else if (action == "logout") {
       user.logout();
@@ -86,6 +89,11 @@
 
 <svelte:head>
   <title>Great success!</title>
+  <script
+    type="text/javascript"
+    src="https://identity.netlify.com/v1/netlify-identity-widget.js">
+
+  </script>
 </svelte:head>
 
 <h1>Great success!</h1>
